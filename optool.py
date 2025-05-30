@@ -5,6 +5,7 @@ from rich_argparse import RichHelpFormatter
 from rich.console import Console
 
 from optool import main, OPToolException
+from optool.exceptions import OPToolException_BNF_Code_was_invalid
 
 
 if __name__ == "__main__":
@@ -28,6 +29,9 @@ if __name__ == "__main__":
         bnf_code = str(args.bnf_code) if "bnf_code" in args else ""
 
         main(bnf_code, console)
+
+    except OPToolException_BNF_Code_was_invalid as exc:
+        console.print(exc.message)
 
     except OPToolException:
         console.print("[red]Unfortunately an error occurred with the tool or server.[/red]")
