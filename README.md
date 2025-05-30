@@ -1,0 +1,69 @@
+# Bennett Institute Technical Task <!-- omit in toc -->
+
+## Table of contents <!-- omit in toc -->
+
+- [System requirements](#system-requirements)
+- [Installation](#installation)
+  - [Venv environment (Optional, but advised)](#venv-environment-optional-but-advised)
+  - [Installing the dependencies](#installing-the-dependencies)
+- [Running the script](#running-the-script)
+- [Code structuring notes](#code-structuring-notes)
+
+
+## System requirements
+
+- Python (This was written in a Python 3.12 environment, but will likely run in 3.11, and 3.10 too)
+- POSIX compliant operating system, like a linux distribution or MacOSX.
+
+## Installation
+
+### Venv environment (Optional, but advised)
+
+Using a python virtual environment separates all the installed packages on your machine from the ones I've suggested to install, which can cause version clashes.
+
+The recommendation I would make is to create a virtual environment using the inbuilt `venv` module, by executing the following command:
+
+```sh
+$ python -m venv .venv
+```
+
+and then
+
+```
+source .venv/bin/activate
+```
+
+At that point, you should be able to run `which python` and see a line output that ends in `.venv/bin/python`
+
+### Installing the dependencies
+
+For simplicity, I'm using `pip`, as it's included in the Python default distributions, so just run:
+
+```sh
+pip install -r requirements.txt
+```
+
+_Typically I would separate out requirements for dev and running requirements, but for a small scale tech test, I wouldn't do this._
+
+This will run the installation of the dependencies, and provided it runs successfully, you'll have everything in place to run the solution.
+
+## Running the script
+
+The script is run by running the script as specified in [`PROBLEM.md`](PROBLEM.md), so can normally be run simply by running `python optool.py`, but it includes a [hashbang](https://en.wikipedia.org/wiki/Shebang_%28Unix%29), so many POSIX-compatible systems will be able to run it as just `optool.py`
+
+```sh
+python optool.py
+```
+
+You can also run the tests by running:
+
+```sh
+pytest
+```
+
+## Code structuring notes
+
+- To allow separation of concerns, there is a module to contain separate files, but the `opcode.py` file is in the root directory as was implied in the problem description
+- Unit testing is in the `tests` directory, which is also a module.
+  - I chose to use `pytest`, as it makes some things easier, once the paradigms are understood.
+  - `pytest` is acccompanied by `pytest-async` to allow testing of asynchronous python code.
