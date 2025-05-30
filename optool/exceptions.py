@@ -4,3 +4,6 @@ This allows us to differentiate between expected and unexpected errors, and hand
 
 class OPToolException(BaseException):
     ...
+
+class OPToolException_BNF_Code_was_invalid(OPToolException):
+    ...

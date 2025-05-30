@@ -28,7 +28,7 @@ if __name__ == "__main__":
         args: Namespace = argument_parser.parse_args()
         bnf_code = str(args.bnf_code) if "bnf_code" in args else ""
 
-        main(bnf_code)
+        main(bnf_code, console)
 
     except OPToolException:
         console.print("[red]Unfortunately an error occurred with the tool or server.[/red]")
