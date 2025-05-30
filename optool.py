@@ -22,7 +22,6 @@ if __name__ == "__main__":
             "bnf_code",
             type=str,
             help="The BNF code to look up",
-            required=True,
         )
 
         args: Namespace = argument_parser.parse_args()

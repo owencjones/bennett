@@ -6,4 +6,6 @@ class OPToolException(BaseException):
     ...
 
 class OPToolException_BNF_Code_was_invalid(OPToolException):
-    ...
+    def __init__(self, message: str):
+        self.message = message
+        super()

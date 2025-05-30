@@ -1,3 +1,4 @@
+from re import match
 from optool.exceptions import OPToolException, OPToolException_BNF_Code_was_invalid
 from rich.console import Console
 
@@ -32,7 +33,7 @@ def main(bnf_code: str, console: Console) -> None:
     console.print(output)
 
 
-def validate_bnf_code(bnf_str) -> None:
+def validate_bnf_code(bnf_str: str) -> None:
     """
     Validates a BNF Code input from the user
 
@@ -44,7 +45,18 @@ def validate_bnf_code(bnf_str) -> None:
     ______
     OPToolException_BNF_Code_was_invalid - If the BNF code is invalid
     """
-    raise NotImplementedError
+    
+    if len(bnf_str) < 15:
+        raise OPToolException_BNF_Code_was_invalid("The tool currently only accepts full 15 character BNF codes, sorry!")
+    elif (len(bnf_str) > 15):
+        raise OPToolException_BNF_Code_was_invalid("The code you entered was too long to be valid.")
+    
+    bnf_regex = r"[0-9]{6}[A-Z0-9]{9}"
+
+    if not match(bnf_regex, bnf_str):
+        raise OPToolException_BNF_Code_was_invalid("Code doesn't appear to be a valid BNF code")
+    
+    return
 
 
 def retrieve_api_output(bnf_code: str) -> dict:

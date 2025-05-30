@@ -7,5 +7,6 @@ from .open_prescribe import (
 )
 
 from .exceptions import (
-    OPToolException # noqa: F401
+    OPToolException, # noqa: F401
+    OPToolException_BNF_Code_was_invalid, # noqa: F401
 )
