@@ -4,8 +4,7 @@ from argparse import ArgumentParser, Namespace
 from rich_argparse import RichHelpFormatter
 from rich.console import Console
 
-from optool import main, OPToolException
-from optool.exceptions import OPToolException_BNF_Code_was_invalid
+from optool import main, OPToolException, OPToolException_BNF_Code_was_invalid, OPToolException_API_connection_failed
 
 
 if __name__ == "__main__":
@@ -32,13 +31,18 @@ if __name__ == "__main__":
 
     except OPToolException_BNF_Code_was_invalid as exc:
         console.print(exc.message)
+        exit(1)
+
+    except OPToolException_API_connection_failed as exc:
+        console.print(exc.message)
+        exit(2)
 
     except OPToolException:
         console.print("[red]Unfortunately an error occurred with the tool or server.[/red]")
         console.print("Check your internet connection, and if you still have issues, contact technical support.\n")
         console.print_exception()
 
-        exit(1)
+        exit(100)
 
     except Exception:
         console.print("[red]An error has occurred that we were not expecting[/red]")

@@ -3,9 +3,12 @@ This allows us to differentiate between expected and unexpected errors, and hand
 """
 
 class OPToolException(BaseException):
-    ...
-
-class OPToolException_BNF_Code_was_invalid(OPToolException):
     def __init__(self, message: str):
         self.message = message
         super()
+
+class OPToolException_BNF_Code_was_invalid(OPToolException):
+    ...
+
+class OPToolException_API_connection_failed(OPToolException):
+    ...
