@@ -67,3 +67,6 @@ pytest
 - Unit testing is in the `tests` directory, which is also a module.
   - I chose to use `pytest`, as it makes some things easier, once the paradigms are understood.
   - `pytest` is acccompanied by `pytest-async` to allow testing of asynchronous python code.
+- I've chosen to use `rich` and `Argparse` for the argument parsing, and presentation of output, as `Argparse` is built-in, and `rich` is something I'm familiar with from a CLI that I wrote in the past.
+- Although normally I would use a more modern library like `httpx` that offers good asynchronous support for API calls, I've chosen to use `requests` on this occasion, because its fluent API is very straightforward to use.
+- I've tried to use typed code as much as possible to make it clear, even though in Python, type hints are sugar, and non-functional.
