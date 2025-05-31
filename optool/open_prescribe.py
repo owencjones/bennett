@@ -1,10 +1,9 @@
 from requests import get as get_http
 
 from re import match
-from optool.exceptions import (
+from .exceptions import (
     OPToolException_API_connection_failed,
     OPToolException_BNF_Code_was_invalid,
-    OPToolException_API_connection_failed,
 )
 from rich.console import Console
 
@@ -80,18 +79,25 @@ def retrieve_api_output(url: str) -> dict:
     output_http = get_http(url, timeout=5000, allow_redirects=True)
 
     if output_http.status_code == 404:
-        raise OPToolException_API_connection_failed("The code did not match any BNF item(s)")
+        raise OPToolException_API_connection_failed(
+            "The code did not match any BNF item(s)"
+        )
 
-    if 302 <= output_http.status_code >= 200:
-        raise OPToolException_API_connection_failed(f"Attempting to connect to the API Failed.  We got a response code of {output_http.status_code}  You could try again, or contact technical support.")
-    
-    if (content_type := output_http.headers.get('Content-Type')) is not None and content_type != 'application/json':
-        raise OPToolException_API_connection_failed("We didn't get the type of data we were expecting from the API!")
-    
+    if output_http.status_code not in [200, 201]:
+        raise OPToolException_API_connection_failed(
+            f"Attempting to connect to the API Failed.  We got a response code of {output_http.status_code}  You could try again, or contact technical support."
+        )
+
+    if (
+        content_type := output_http.headers.get("Content-Type")
+    ) is not None and content_type != "application/json":
+        raise OPToolException_API_connection_failed(
+            "We didn't get the type of data we were expecting from the API!"
+        )
+
     data = output_http.json()
 
     return data
-
 
 
 def retrieve_single_drug(bnf_code: str) -> dict:
@@ -99,11 +105,12 @@ def retrieve_single_drug(bnf_code: str) -> dict:
     return retrieve_api_output(url)
 
 
-def 
+# TODO: Extra calls to call the API endpoints we will need to in future
+# https://openprescribing.net/api/1.0/spending_by_org/?org_type=icb etc...
 
 
 def produce_output(api_output: dict) -> str:
     """
     Produces a string to output to the user
     """
-    return str(api_output[0]['name'])
+    return str(api_output[0]["name"])

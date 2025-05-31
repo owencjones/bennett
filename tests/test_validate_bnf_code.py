@@ -1,6 +1,7 @@
 import pytest
 
-from optool import validate_bnf_code, OPToolException_BNF_Code_was_invalid
+from optool import validate_bnf_code
+from optool.exceptions import OPToolException_BNF_Code_was_invalid
 
 
 class TestValidateBnfCode:

@@ -4,7 +4,12 @@ from argparse import ArgumentParser, Namespace
 from rich_argparse import RichHelpFormatter
 from rich.console import Console
 
-from optool import main, OPToolException, OPToolException_BNF_Code_was_invalid, OPToolException_API_connection_failed
+from optool.exceptions import (
+    OPToolException,
+    OPToolException_BNF_Code_was_invalid,
+    OPToolException_API_connection_failed,
+)
+from optool import main
 
 
 if __name__ == "__main__":
@@ -15,9 +20,9 @@ if __name__ == "__main__":
         argument_parser = ArgumentParser(
             prog="OpenPrescribe Command Line Tool",
             description="A tool for accessing the OpenPrescribe API to lookup a BNF code",
-            formatter_class=RichHelpFormatter
+            formatter_class=RichHelpFormatter,
         )
-        
+
         argument_parser.add_argument(
             "bnf_code",
             type=str,
@@ -38,8 +43,12 @@ if __name__ == "__main__":
         exit(2)
 
     except OPToolException:
-        console.print("[red]Unfortunately an error occurred with the tool or server.[/red]")
-        console.print("Check your internet connection, and if you still have issues, contact technical support.\n")
+        console.print(
+            "[red]Unfortunately an error occurred with the tool or server.[/red]"
+        )
+        console.print(
+            "Check your internet connection, and if you still have issues, contact technical support.\n"
+        )
         console.print_exception()
 
         exit(100)

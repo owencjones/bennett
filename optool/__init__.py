@@ -6,9 +6,3 @@ from .open_prescribe import (
     produce_output, # noqa: F401
     retrieve_single_drug, # noqa F401
 )
-
-from .exceptions import (
-    OPToolException, # noqa: F401
-    OPToolException_BNF_Code_was_invalid, # noqa: F401
-    OPToolException_API_connection_failed, # noqa: F401
-)
