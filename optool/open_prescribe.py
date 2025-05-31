@@ -1,4 +1,4 @@
-from requests import get as get_http
+from requests import Response, get as get_http
 
 from re import match
 from .exceptions import (
@@ -6,8 +6,6 @@ from .exceptions import (
     OPToolException_BNF_Code_was_invalid,
 )
 from rich.console import Console
-
-API_BASE = "https://openprescribing.net/api"
 
 
 def main(bnf_code: str, console: Console) -> None:
@@ -32,8 +30,8 @@ def main(bnf_code: str, console: Console) -> None:
     """
 
     validate_bnf_code(bnf_code)
-    api_output = retrieve_single_drug_chemical(bnf_code)
-    output = produce_output(api_output)
+    chemical, chemical_code = retrieve_single_drug_chemical(bnf_code)
+    output = produce_output(chemical, [])
 
     console.print(output)
 
@@ -62,7 +60,7 @@ def validate_bnf_code(bnf_str: str) -> None:
             "The code you entered was too long to be valid."
         )
 
-    bnf_regex = r"[0-9]{6}[A-Z0-9]{9}"
+    bnf_regex = r"[0-9]{6}[A-Z0-9\*]{9}"
 
     if not match(bnf_regex, bnf_str):
         raise OPToolException_BNF_Code_was_invalid(
@@ -72,7 +70,7 @@ def validate_bnf_code(bnf_str: str) -> None:
     return
 
 
-def retrieve_api_output(url: str) -> dict:
+def retrieve_api_output(url: str) ->  dict | list:
     """
     Accesses the API and uses the output and turns it into a limited set of info we need for the specs
     """
@@ -99,8 +97,10 @@ def retrieve_api_output(url: str) -> dict:
 
     return data
 
-
-def retrieve_single_drug_chemical(bnf_code: str) -> str:
+#############
+# Stage One #
+#############
+def retrieve_single_drug_chemical(bnf_code: str) -> tuple[str, str]:
     chemical_name_from_code = bnf_code[0:9]
     url = f"https://openprescribing.net/api/1.0/bnf_code/?format=json&q={chemical_name_from_code}"
 
@@ -113,15 +113,38 @@ def retrieve_single_drug_chemical(bnf_code: str) -> str:
     if len(chemical_names) > 1:
         raise OPToolException_BNF_Code_was_invalid("The BNF Code returned {len(chemical_names)} names for base chemical, which should be possible...  Please report this")
 
-    return chemical_names[0]
+    return chemical_names[0], chemical_name_from_code
+
+#############
+# Stage Two #
+#############
+
+def get_spending_by_org(chemical_code: str) -> list:
+    url = f"https://openprescribing.net/api/1.0/spending_by_org/?format=json&org_type=icb&code={chemical_code}"
+
+    output = retrieve_api_output(url)
+    assert isinstance(output, list)
+
+    unique_icbs = get_unique_items_by_key(output, 'row_name')
+    unique_months = get_unique_items_by_key(output, 'date')
+
+    for month in unique_months:
+        TODO: pickup here.
+
+    
 
 
-# TODO: Extra calls to call the API endpoints we will need to in future
-# https://openprescribing.net/api/1.0/spending_by_org/?org_type=icb etc...
+def get_unique_items_by_key(api_output: list[dict], key: str) -> list:
+    items = set([i[key] for i in api_output if i.get(key)])
+    return list(items)
 
 
-def produce_output(api_output) -> str:
+def produce_output(chemical_name: str, spending_by_org: list[str]) -> str:
     """
     Produces a string to output to the user
     """
-    return "\n" + str(api_output) + "\n"
+    output = "\n" + str(chemical_name) + "\n"
+
+    output += "\n".join(spending_by_org)
+
+    return output

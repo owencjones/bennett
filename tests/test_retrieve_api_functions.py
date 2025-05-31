@@ -1,3 +1,5 @@
+from json import loads
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 import pytest
 from requests import Response
@@ -7,20 +9,11 @@ from optool import (
     retrieve_single_drug_chemical,
 )
 from optool.exceptions import OPToolException_API_connection_failed
+from optool.open_prescribe import get_spending_by_org
 
+from .fixtures import * #noqa: F403
 
 class TestApiRetrieveApiOutput:
-
-    @pytest.fixture
-    def get_http_fixture(self):
-        with patch("optool.open_prescribe.get_http", spec=Response) as get_http_mock:
-            get_http_mock.status_code = 200
-            get_http_mock.headers = dict()
-            get_http_mock.headers["Content-type"] = "application/json"
-            get_http_mock.json = MagicMock()
-            get_http_mock.json.return_value = {"foo": "bar"}
-
-            yield get_http_mock
 
     @pytest.mark.parametrize("status_code", [200, 201])
     def test_all_of_the_valid_statuses(
@@ -58,10 +51,17 @@ class TestRetrieveSingleDrug:
             ("0212000AAAAAIAI", "Rosuvastatin calcium"),
             ("0407010ADBCAAAB", "Paracetamol and ibuprofen"),
             ("0301020I0BBAFAF", "Ipratropium bromide"),
-            ("040702040BEABAC", 'Tramadol hydrochloride'),
+            ("040702040BEABAC", "Tramadol hydrochloride"),
         ],
     )
     def test_successfully_retrieves_a_real_bnf_entry(self, bnf_code, expectation):
         output = retrieve_single_drug_chemical(bnf_code)
 
-        assert output == expectation
+        assert output[0] == expectation
+
+
+class TestGetSpendingByOrg:
+
+    def test_something(self) -> None:
+        output = get_spending_by_org("1304000H0")
+        assert output

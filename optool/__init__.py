@@ -5,4 +5,5 @@ from .open_prescribe import (
     retrieve_api_output, # noqa: F401
     produce_output, # noqa: F401
     retrieve_single_drug_chemical, # noqa F401
+    get_spending_by_org, #noqa F401
 )
