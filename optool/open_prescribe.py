@@ -32,7 +32,7 @@ def main(bnf_code: str, console: Console) -> None:
     """
 
     validate_bnf_code(bnf_code)
-    api_output = retrieve_api_output(bnf_code)
+    api_output = retrieve_single_drug_chemical(bnf_code)
     output = produce_output(api_output)
 
     console.print(output)
@@ -100,17 +100,28 @@ def retrieve_api_output(url: str) -> dict:
     return data
 
 
-def retrieve_single_drug(bnf_code: str) -> dict:
-    url = f"https://openprescribing.net/api/1.0/bnf_code/?exact=true&format=json&q={bnf_code}"
-    return retrieve_api_output(url)
+def retrieve_single_drug_chemical(bnf_code: str) -> str:
+    chemical_name_from_code = bnf_code[0:9]
+    url = f"https://openprescribing.net/api/1.0/bnf_code/?format=json&q={chemical_name_from_code}"
+
+    output = retrieve_api_output(url)
+
+    chemical_names = [
+        item.get("name") for item in output if item.get("type") == "chemical"
+    ]
+
+    if len(chemical_names) > 1:
+        raise OPToolException_BNF_Code_was_invalid("The BNF Code returned {len(chemical_names)} names for base chemical, which should be possible...  Please report this")
+
+    return chemical_names[0]
 
 
 # TODO: Extra calls to call the API endpoints we will need to in future
 # https://openprescribing.net/api/1.0/spending_by_org/?org_type=icb etc...
 
 
-def produce_output(api_output: dict) -> str:
+def produce_output(api_output) -> str:
     """
     Produces a string to output to the user
     """
-    return str(api_output[0]["name"])
+    return "\n" + str(api_output) + "\n"

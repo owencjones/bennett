@@ -1,6 +1,4 @@
 import pytest
 
-class TestException(Exception):
-    ...
 
-
+class TestException(Exception): ...
