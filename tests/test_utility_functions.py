@@ -18,3 +18,7 @@ class TestGetUniqueItemsByKey:
     def test_empty_list(self):
         result = get_unique_items_by_key([], "name")
         assert result == []
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])

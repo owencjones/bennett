@@ -1,6 +1,6 @@
 import pytest
 
-from optool.open_prescribe import produce_output, parse_highest_orderer_for_month
+from optool.open_prescribe import parse_highest_orderer_for_month, produce_output
 
 
 class TestParseProduceOutput:
@@ -35,3 +35,7 @@ class TestParseHighestOrdererForMonth:
 
     def test_empty_input(self):
         assert parse_highest_orderer_for_month({}) == []
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])

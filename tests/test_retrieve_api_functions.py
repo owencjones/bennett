@@ -1,6 +1,7 @@
 from json import loads
 from pathlib import Path
 from unittest.mock import patch
+
 import pytest
 from requests import Response, get
 
@@ -10,8 +11,8 @@ from optool import (
 )
 from optool.exceptions import OPToolException_API_connection_failed
 from optool.open_prescribe import (
-    get_spending_by_org,
     generate_weighting_by_icb_headcount,
+    get_spending_by_org,
 )
 
 from .fixtures import *  # noqa: F403
@@ -135,3 +136,7 @@ class TestGenerateWeightingByICBHeadcount:
         ):  # Workaround because pytest doesn't allow all of the entries to be stored in the fixture, this tests around 950
             if k in weighted_results:
                 assert weighted_results[k] == v
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])
