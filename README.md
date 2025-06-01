@@ -15,6 +15,7 @@
 
 - Python (This was written in a Python 3.12 environment, but will likely run in 3.11, and 3.10 too)
 - POSIX compliant operating system, like a linux distribution or MacOSX.
+- If you don't have a POSIX OS, then UTM or Docker can allow you to run a virtualised one
 
 ## Installation
 
