@@ -27,9 +27,15 @@ if __name__ == "__main__":
             help="The BNF code to look up",
         )
 
+        argument_parser.add_argument(
+            "--weighted",
+            action="store_true",
+            help="If set, the results will be weighted by headcount in ICBs",
+        )
+
         args: Namespace = argument_parser.parse_args()
         bnf_code = str(args.bnf_code) if "bnf_code" in args else ""
-        main(bnf_code, console)
+        main(bnf_code, console, args.weighted)
 
     except OPToolException_BNF_Code_was_invalid as exc:
         console.print(exc.message)

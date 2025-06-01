@@ -1,4 +1,7 @@
+from argparse import Namespace
+from enum import unique
 from re import match
+from typing import Optional
 
 from requests import get as get_http
 from rich.console import Console
@@ -9,7 +12,7 @@ from .exceptions import (
 )
 
 
-def main(bnf_code: str, console: Console) -> None:
+def main(bnf_code: str, console: Console, weighted: bool) -> None:
     """
     Default entrypoint for the tool.
 
@@ -32,7 +35,7 @@ def main(bnf_code: str, console: Console) -> None:
 
     validate_bnf_code(bnf_code)
     chemical, chemical_code = retrieve_single_drug_chemical(bnf_code)
-    ordering_by_org = get_spending_by_org(chemical_code)
+    ordering_by_org = get_spending_by_org(chemical_code, weighted)
     output = produce_output(chemical, ordering_by_org)
 
     console.print(output)
@@ -126,7 +129,9 @@ def retrieve_single_drug_chemical(bnf_code: str) -> tuple[str, str]:
 #############
 
 
-def get_spending_by_org(chemical_code: str) -> dict[str, tuple[str, int]]:
+def get_spending_by_org(
+    chemical_code: str, weighted: Optional[bool] = False
+) -> dict[str, tuple[str, int]]:
     url = f"https://openprescribing.net/api/1.0/spending_by_org/?format=json&org_type=icb&code={chemical_code}"
 
     api_output = retrieve_api_output(url)
@@ -141,13 +146,25 @@ def get_spending_by_org(chemical_code: str) -> dict[str, tuple[str, int]]:
     icb_with_highest_ordering_per_month = {}
     icb_to_quantity = {}
 
+    if weighted:
+        icb_month_to_headcount = generate_weighting_by_icb_headcount(chemical_code)
+    else:
+        icb_month_to_headcount = {}
+
     for month in unique_months:
         for icb in unique_icbs:
-            total_for_month = sum(
-                item["items"]
-                for item in api_output
-                if item.get("row_name") == icb and item.get("date") == month
-            )
+            if weighted:
+                total_for_month = sum(
+                    item["items"] / icb_month_to_headcount.get(f"{icb}_{month}", 1)
+                    for item in api_output
+                    if item.get("row_name") == icb and item.get("date") == month
+                )
+            else:
+                total_for_month = sum(
+                    item["items"]
+                    for item in api_output
+                    if item.get("row_name") == icb and item.get("date") == month
+                )
 
             if icb in icb_to_quantity:
                 icb_to_quantity[icb] += total_for_month
@@ -168,8 +185,49 @@ def get_unique_items_by_key(api_output: list[dict], key: str) -> list:
     return list(items)
 
 
-def parse_highest_spender_for_month(
-    info_from_api: dict[str, tuple[str, str]],
+###############
+# Stage Three #
+###############
+
+
+def generate_weighting_by_icb_headcount(chemical_code: str) -> dict[str, int]:
+    url = f"https://openprescribing.net/api/1.0/org_details/?org_type=icb&keys=total_list_size&format=json&code={chemical_code}"
+
+    api_output = retrieve_api_output(url)
+
+    if not api_output or not isinstance(api_output, list):
+        raise OPToolException_API_connection_failed(
+            "No data was returned for the chemical code provided.  Please check the code and try again."
+        )
+
+    unique_icbs = get_unique_items_by_key(api_output, "row_name")
+    unique_months = sorted(get_unique_items_by_key(api_output, "date"), reverse=True)
+
+    icb_month_to_headcount: dict[str, int] = {}
+
+    for month in unique_months:
+        for icb in unique_icbs:
+            key = f"{icb}_{month}"
+
+            headcount = next(
+                (
+                    item["total_list_size"]
+                    for item in api_output
+                    if item.get("row_name") == icb and item.get("date") == month
+                ),
+                1,  # Default to 1 if not found to avoid div/0
+            )
+
+            icb_month_to_headcount[key] = headcount
+
+    return icb_month_to_headcount
+
+
+# Output functions
+
+
+def parse_highest_orderer_for_month(
+    info_from_api: dict[str, tuple[str, int]],
 ) -> list[str]:
     """
     Parses the list of highest spenders into a list of strings for output
@@ -185,6 +243,6 @@ def produce_output(chemical_name: str, spending_by_org: dict) -> str:
     """
     output = "\n" + str(chemical_name) + "\n\n"
 
-    output += "\n".join(parse_highest_spender_for_month(spending_by_org))
+    output += "\n".join(parse_highest_orderer_for_month(spending_by_org))
 
     return output
