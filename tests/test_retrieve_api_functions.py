@@ -3,7 +3,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from requests import Response, get
+from requests import Response
 
 from optool import (
     retrieve_api_output,
