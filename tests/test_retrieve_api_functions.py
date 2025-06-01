@@ -1,6 +1,7 @@
 from json import loads
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+import re
+from unittest.mock import patch
 import pytest
 from requests import Response
 
@@ -11,7 +12,8 @@ from optool import (
 from optool.exceptions import OPToolException_API_connection_failed
 from optool.open_prescribe import get_spending_by_org
 
-from .fixtures import * #noqa: F403
+from .fixtures import *  # noqa: F403
+
 
 class TestApiRetrieveApiOutput:
 
@@ -61,7 +63,38 @@ class TestRetrieveSingleDrug:
 
 
 class TestGetSpendingByOrg:
+    # For speed this is done on a expected output for expected output
 
-    def test_something(self) -> None:
+    @pytest.fixture
+    def mocked_api_response(self):
+        test_data = (
+            (Path(__file__).parent) / "data" / "spending_by_org.json"
+        ).read_text(encoding="utf-8")
+        with patch(
+            "optool.open_prescribe.retrieve_api_output", return_value=loads(test_data)
+        ) as mock:
+            yield mock
+
+    @pytest.fixture
+    def mocked_output(self, mocked_api_response):
+        test_data = (
+            (Path(__file__).parent) / "data" / "spending_by_org_expectation.json"
+        ).read_text(encoding="utf-8")
+        return loads(test_data)
+    
+    """
+    These tests are not intended to be exhaustive, but rather to ensure that the function
+    behaves as expected with a known input and output.
+
+    The tests of `TestApiRetrieveApiOutput` are more illustrative of my usual style.
+    """
+
+    def test_output_is_correct(self, mocked_api_response, mocked_output) -> None:
         output = get_spending_by_org("1304000H0")
-        assert output
+        
+        assert len(mocked_output) == len(output), "Output was of a different length!"
+        
+        simplified_mocked_output = [(k, v[0], v[1]) for k,v in mocked_output.items()]
+        simplified_output = [(k, v[0], v[1]) for k, v in output.items()]
+
+        assert simplified_mocked_output == simplified_output, "Output did not match expectation"

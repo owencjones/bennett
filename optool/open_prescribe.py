@@ -1,4 +1,4 @@
-from requests import Response, get as get_http
+from requests import get as get_http
 
 from re import match
 from .exceptions import (
@@ -31,7 +31,8 @@ def main(bnf_code: str, console: Console) -> None:
 
     validate_bnf_code(bnf_code)
     chemical, chemical_code = retrieve_single_drug_chemical(bnf_code)
-    output = produce_output(chemical, [])
+    ordering_by_org = get_spending_by_org(chemical_code)
+    output = produce_output(chemical, ordering_by_org)
 
     console.print(output)
 
@@ -70,7 +71,7 @@ def validate_bnf_code(bnf_str: str) -> None:
     return
 
 
-def retrieve_api_output(url: str) ->  dict | list:
+def retrieve_api_output(url: str) -> dict | list:
     """
     Accesses the API and uses the output and turns it into a limited set of info we need for the specs
     """
@@ -97,6 +98,7 @@ def retrieve_api_output(url: str) ->  dict | list:
 
     return data
 
+
 #############
 # Stage One #
 #############
@@ -111,27 +113,53 @@ def retrieve_single_drug_chemical(bnf_code: str) -> tuple[str, str]:
     ]
 
     if len(chemical_names) > 1:
-        raise OPToolException_BNF_Code_was_invalid("The BNF Code returned {len(chemical_names)} names for base chemical, which should be possible...  Please report this")
+        raise OPToolException_BNF_Code_was_invalid(
+            "The BNF Code returned {len(chemical_names)} names for base chemical, which should be possible...  Please report this"
+        )
 
     return chemical_names[0], chemical_name_from_code
+
 
 #############
 # Stage Two #
 #############
 
-def get_spending_by_org(chemical_code: str) -> list:
+
+def get_spending_by_org(chemical_code: str) -> dict[str, tuple[str, int]]:
     url = f"https://openprescribing.net/api/1.0/spending_by_org/?format=json&org_type=icb&code={chemical_code}"
 
-    output = retrieve_api_output(url)
-    assert isinstance(output, list)
+    api_output = retrieve_api_output(url)
+    if not api_output or not isinstance(api_output, list):
+        raise OPToolException_API_connection_failed(
+            "No data was returned for the chemical code provided.  Please check the code and try again."
+        )
 
-    unique_icbs = get_unique_items_by_key(output, 'row_name')
-    unique_months = get_unique_items_by_key(output, 'date')
+    unique_icbs = get_unique_items_by_key(api_output, "row_name")
+    unique_months = sorted(get_unique_items_by_key(api_output, "date"), reverse=True)
+
+    icb_with_highest_ordering_per_month = {}
+    icb_to_quantity = {}
 
     for month in unique_months:
-        TODO: pickup here.
+        for icb in unique_icbs:
+            total_for_month = sum(
+                item["items"]
+                for item in api_output
+                if item.get("row_name") == icb and item.get("date") == month
+            )
 
-    
+            if icb in icb_to_quantity:
+                icb_to_quantity[icb] += total_for_month
+            else:
+                icb_to_quantity[icb] = total_for_month
+
+            icb_to_quantity[icb] = total_for_month
+
+        icb_with_highest_ordering_per_month[month] = max(
+            icb_to_quantity.items(), key=lambda x: x[1], default=(None, 0)
+        )
+
+    return icb_with_highest_ordering_per_month
 
 
 def get_unique_items_by_key(api_output: list[dict], key: str) -> list:
@@ -139,12 +167,23 @@ def get_unique_items_by_key(api_output: list[dict], key: str) -> list:
     return list(items)
 
 
-def produce_output(chemical_name: str, spending_by_org: list[str]) -> str:
+def parse_highest_spender_for_month(
+    info_from_api: dict[str, tuple[str, str]],
+) -> list[str]:
+    """
+    Parses the list of highest spenders into a list of strings for output
+
+    In format date: [Date] [ICB Name]
+    """
+    return [f"{line[0]} {line[1][0]}" for line in info_from_api.items()]
+
+
+def produce_output(chemical_name: str, spending_by_org: dict) -> str:
     """
     Produces a string to output to the user
     """
-    output = "\n" + str(chemical_name) + "\n"
+    output = "\n" + str(chemical_name) + "\n\n"
 
-    output += "\n".join(spending_by_org)
+    output += "\n".join(parse_highest_spender_for_month(spending_by_org))
 
     return output
