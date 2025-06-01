@@ -1,16 +1,14 @@
 #!/usr/bin/python3
 
 from argparse import ArgumentParser, Namespace
-from rich_argparse import RichHelpFormatter
+
 from rich.console import Console
+from rich_argparse import RichHelpFormatter
 
-from optool.exceptions import (
-    OPToolException,
-    OPToolException_BNF_Code_was_invalid,
-    OPToolException_API_connection_failed,
-)
 from optool import main
-
+from optool.exceptions import (OPToolException,
+                               OPToolException_API_connection_failed,
+                               OPToolException_BNF_Code_was_invalid)
 
 if __name__ == "__main__":
 

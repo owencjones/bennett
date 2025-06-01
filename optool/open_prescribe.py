@@ -1,11 +1,12 @@
-from requests import get as get_http
-
 from re import match
+
+from requests import get as get_http
+from rich.console import Console
+
 from .exceptions import (
     OPToolException_API_connection_failed,
     OPToolException_BNF_Code_was_invalid,
 )
-from rich.console import Console
 
 
 def main(bnf_code: str, console: Console) -> None:
