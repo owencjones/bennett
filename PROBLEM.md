@@ -27,12 +27,6 @@ find any, please let us know!
 
 ## Communication
 
-Send any questions you have about the problem to Ben Butler-Cole at
-`benjamin.butler-cole@phc.ox.ac.uk`.
-
-To submit your solution,
-first push it to a **private** GitHub repository and then add both `benbc` and `rebkwok` as collaborators.
-
 If you've not used GitHub before, then you may find the following helpful:
 
 * "[Creating an account on GitHub](https://docs.github.com/en/get-started/start-your-journey/creating-an-account-on-github)"

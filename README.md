@@ -3,6 +3,7 @@
 ## Table of contents <!-- omit in toc -->
 
 - [System requirements](#system-requirements)
+- [Warning](#warning)
 - [Installation](#installation)
   - [Venv environment (Optional, but advised)](#venv-environment-optional-but-advised)
   - [Installing the dependencies](#installing-the-dependencies)
@@ -17,6 +18,24 @@
 - Python (This was written in a Python 3.12 environment, but will likely run in 3.11, and 3.10 too)
 - POSIX compliant operating system, like a linux distribution or MacOSX.
 - If you don't have a POSIX OS, then UTM or Docker can allow you to run a virtualised one (there is a Dockerfile, but this is for convenience, and I haven't used it or tested it!)
+
+## Warning
+
+This is a technical test that I agreed to do pre-interview for a role at a doubtless actually pretty admirable organisation, but which failed.
+
+So, in short, _don't copy it_ it's not functional code, and when you spot the problem, if you do, _that's_ a better tech test than
+this was.
+
+However some points:
+
+- I spoke to the recruiter, and he told me the that there was an emphasis at this organisation on removing selection bias from the selection process
+- I introduced some selection bias, by doing this work _whilst impaired_ - I was under a titration regime for my medication, and chose not to introduce details of my disabilities to this would-be employer.  That's always a difficult tightrope to walk, to be honest, and introduce a bias, or not ask for a reasonable adjustment.
+- The recruiting employer chose to make this task to be done during a school holiday - I would argue this introduces a selection bias against any single parent
+- I also, to challenge myself, decided to write as much of this in native Python, using standard libs, so the code isn't as verbose as it could've been; partly because of this, and partly because of the above.
+
+The recruiter also told me that of 20 candidates, they chose to interview 2, and this is suggestive of a bias in itself.
+
+If you do want to solve it (it's not too complex if you aren't off your head on Sodium Channel Blockers) - write the output into a graph db, and use a graph query language to query it.  The data is inherently graph like.  A drug is a drug.  A prescribing body is a prescribing body.  An amount of a drug prescribed within certain parameters is the result of a graph transaction (although you could easily enough do this with SQL and shoehorn it into tabular forms - just know that you'd be connecting nodular entities).
 
 ## Installation
 
